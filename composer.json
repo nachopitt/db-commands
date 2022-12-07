@@ -1,0 +1,21 @@
+{
+    "name": "nachopitt/db-commands",
+    "homepage": "https://github.com/nachopitt/db-commands",
+    "keywords": ["database","sql","mysql","laravel","schema","create","drop","import","export"],
+    "license": "MIT",
+    "require": {
+        "laravel/framework": "^9.43"
+    },
+    "autoload": {
+        "psr-4": {
+            "Nachopitt\\Database\\": "src"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Nachopitt\\Database\\ConsoleSupportServiceProvider"
+            ]
+        }
+    }
+}
