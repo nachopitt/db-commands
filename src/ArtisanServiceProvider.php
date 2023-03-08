@@ -6,6 +6,7 @@ use Nachopitt\Database\Console\Commands\DbCreateCommand;
 use Nachopitt\Database\Console\Commands\DbDropCommand;
 use Nachopitt\Database\Console\Commands\DbExportCommand;
 use Nachopitt\Database\Console\Commands\DbImportCommand;
+use Nachopitt\Database\Console\Commands\DbTruncateCommand;
 
 class ArtisanServiceProvider extends \Illuminate\Foundation\Providers\ArtisanServiceProvider
 {
@@ -16,6 +17,7 @@ class ArtisanServiceProvider extends \Illuminate\Foundation\Providers\ArtisanSer
             'DbDrop' => DbDropCommand::class,
             'DbImport' => DbImportCommand::class,
             'DbExport' => DbExportCommand::class,
+            'DbTruncate' => DbTruncateCommand::class,
         ];
         $this->devCommands = [];
         parent::__construct($app);
@@ -66,6 +68,18 @@ class ArtisanServiceProvider extends \Illuminate\Foundation\Providers\ArtisanSer
     {
         $this->app->singleton(DbExportCommand::class, function ($app) {
             return new DbExportCommand;
+        });
+    }
+
+    /**
+     * Register the command.
+     *
+     * @return void
+     */
+    protected function registerDbTruncateCommand()
+    {
+        $this->app->singleton(DbTruncateCommand::class, function ($app) {
+            return new DbTruncateCommand;
         });
     }
 
