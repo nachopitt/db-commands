@@ -4,7 +4,7 @@
     "keywords": ["database","sql","mysql","laravel","schema","create","drop","import","export"],
     "license": "MIT",
     "require": {
-        "laravel/framework": "^9.0|^10.0"
+        "laravel/framework": "^9.0|^10.0|^11.0|^12.0"
     },
     "autoload": {
         "psr-4": {
