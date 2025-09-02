@@ -31,13 +31,14 @@ class DbExportCommand extends Command
         $defaultHost = config("database.connections.mysql.host");
         $defaultUsername = config("database.connections.mysql.username");
         $defaultDatabase = config("database.connections.mysql.database");
+        $defaultPassword = config("database.connections.mysql.password");
 
         $schemaName = $this->argument('schema') ?: $defaultDatabase;
 
         config(["database.connections.mysql.database" => $schemaName]);
 
         $process = new Process([
-            'mysqldump', '-h', $defaultHost, '-u', $defaultUsername, '-p', '-d', $schemaName
+            'mysqldump', '-h', $defaultHost, '-u', $defaultUsername, "--password=$defaultPassword", '-d', $schemaName
         ]);
         $process->run();
 
