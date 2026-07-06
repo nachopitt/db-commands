@@ -43,13 +43,14 @@ php artisan db:drop {name?} {--c|connection=}
 Export an existing MySQL database into SQL statements.
 
 ```bash
-php artisan db:export {schema?} {--c|connection=}
+php artisan db:export {schema?} {--c|connection=} {--skip-ssl}
 ```
 
 | Argument / Option | Description |
 |---|---|
 | `schema` | The name of the MySQL database to export. If not provided, the command will use the database name from your configuration. |
 | `--connection` | The database connection to use. Defaults to the active default connection. |
+| `--skip-ssl` | Bypass SSL certificate verification for the `mysqldump` command. |
 
 ### `db:import`
 
