@@ -44,6 +44,43 @@ class DbExportCommandTest extends TestCase
         $this->assertEquals('test_db', Config::get('database.connections.mysql.database'));
     }
 
+    public function test_it_exports_database_with_custom_connection()
+    {
+        Config::set('database.connections.custom_conn', [
+            'driver' => 'mysql',
+            'host' => '127.0.0.Custom',
+            'username' => 'custom_user',
+            'password' => 'custom_secret',
+            'database' => 'custom_db',
+        ]);
+
+        $processMock = \Mockery::mock(Process::class);
+        $processMock->shouldReceive('run')->once()->andReturn(0);
+        $processMock->shouldReceive('isSuccessful')->once()->andReturn(true);
+        $processMock->shouldReceive('getOutput')->once()->andReturn('CREATE TABLE users (id INT);');
+
+        $commandMock = \Mockery::mock(DbExportCommand::class . '[makeProcess]');
+        $commandMock->shouldAllowMockingProtectedMethods();
+        $commandMock->shouldReceive('makeProcess')
+            ->once()
+            ->with([
+                'mysqldump', '-h', '127.0.0.Custom', '-u', 'custom_user', '--password=custom_secret', '-d', 'custom_db'
+            ])
+            ->andReturn($processMock);
+
+        $this->app->instance(DbExportCommand::class, $commandMock);
+
+        DB::shouldReceive('purge')->once()->with('custom_conn');
+
+        ob_start();
+        $this->artisan('db:export', ['--connection' => 'custom_conn'])
+            ->assertExitCode(0);
+        $output = ob_get_clean();
+
+        $this->assertStringContainsString('CREATE TABLE users (id INT);', $output);
+        $this->assertEquals('custom_db', Config::get('database.connections.custom_conn.database'));
+    }
+
     public function test_it_exports_database_unsuccessfully()
     {
         $processMock = \Mockery::mock(Process::class);

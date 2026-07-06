@@ -50,6 +50,27 @@ class DbDropCommandTest extends TestCase
             ->assertExitCode(0);
     }
 
+    public function test_it_drops_database_with_custom_connection()
+    {
+        Config::set('database.connections.custom_conn', [
+            'driver' => 'mysql',
+            'host' => '127.0.0.1',
+            'database' => 'custom_db',
+        ]);
+
+        $connectionMock = $this->mockConnection('custom_conn');
+        $connectionMock->shouldReceive('statement')
+            ->once()
+            ->with('DROP DATABASE IF EXISTS custom_db;')
+            ->andReturn(true);
+
+        $this->artisan('db:drop', ['--connection' => 'custom_conn'])
+            ->expectsOutput('You are about to DESTROY completely database custom_db!')
+            ->expectsConfirmation('Do you wish to continue?', 'yes')
+            ->expectsOutput('Drop database custom_db finished successfully!')
+            ->assertExitCode(0);
+    }
+
     public function test_it_fails_gracefully_when_database_dropping_fails()
     {
         $connectionMock = $this->mockConnection('mysql');

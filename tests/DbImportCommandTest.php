@@ -62,6 +62,38 @@ class DbImportCommandTest extends TestCase
         $this->assertEquals('custom_db', Config::get('database.connections.mysql.database'));
     }
 
+    public function test_it_imports_sql_file_with_custom_connection()
+    {
+        Config::set('database.connections.custom_conn', [
+            'driver' => 'mysql',
+            'host' => '127.0.0.1',
+            'database' => 'custom_db',
+        ]);
+
+        $connectionMock = $this->mockConnection('custom_conn');
+
+        File::shouldReceive('get')
+            ->once()
+            ->with('database_model/custom_db.sql')
+            ->andReturn('CREATE TABLE test_table (id INT);');
+
+        $connectionMock->shouldReceive('statement')
+            ->once()
+            ->with('USE `custom_db`')
+            ->andReturn(true);
+
+        $connectionMock->shouldReceive('unprepared')
+            ->once()
+            ->with('CREATE TABLE test_table (id INT);')
+            ->andReturn(true);
+
+        $this->artisan('db:import', ['--connection' => 'custom_conn'])
+            ->expectsOutput('Import SQL file database_model/custom_db.sql into custom_db database finished successfully!')
+            ->assertExitCode(0);
+
+        $this->assertEquals('custom_db', Config::get('database.connections.custom_conn.database'));
+    }
+
     public function test_it_imports_sql_file_ignoring_foreign_key_checks()
     {
         $connectionMock = $this->mockConnection('mysql');

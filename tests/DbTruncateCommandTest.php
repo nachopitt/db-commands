@@ -70,6 +70,36 @@ class DbTruncateCommandTest extends TestCase
         $this->assertEquals('test_db', Config::get('database.connections.mysql.database'));
     }
 
+    public function test_it_truncates_tables_with_custom_connection()
+    {
+        Config::set('database.connections.custom_conn', [
+            'driver' => 'mysql',
+            'host' => '127.0.0.1',
+            'database' => 'custom_db',
+        ]);
+
+        $connectionMock = $this->mockConnection('custom_conn');
+
+        $connectionMock->shouldReceive('statement')
+            ->once()
+            ->with('USE `custom_db`')
+            ->andReturn(true);
+
+        $connectionMock->shouldReceive('statement')
+            ->once()
+            ->with('TRUNCATE TABLE `users`')
+            ->andReturn(true);
+
+        $this->artisan('db:truncate', [
+            'tables' => 'users',
+            '--connection' => 'custom_conn',
+        ])
+            ->expectsOutput('Table users truncated successfully')
+            ->assertExitCode(0);
+
+        $this->assertEquals('custom_db', Config::get('database.connections.custom_conn.database'));
+    }
+
     public function test_it_truncates_ignoring_foreign_key_checks()
     {
         $connectionMock = $this->mockConnection('mysql');
