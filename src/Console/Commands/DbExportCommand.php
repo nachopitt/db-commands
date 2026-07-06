@@ -46,14 +46,14 @@ class DbExportCommand extends Command
         $process->run();
 
         if (!$process->isSuccessful()) {
-            $this->info("Export $schemaName database into SQL statements finished unsuccessfully!");
+            $this->error("Failed to export database '$schemaName'.");
+            $this->error($process->getErrorOutput());
             $exitCode = Command::FAILURE;
         }
         else {
+            $this->line($process->getOutput());
             $exitCode = Command::SUCCESS;
         }
-
-        echo $process->getOutput();
 
         return $exitCode;
     }

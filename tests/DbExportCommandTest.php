@@ -35,12 +35,10 @@ class DbExportCommandTest extends TestCase
 
         DB::shouldReceive('purge')->once()->with('mysql');
 
-        ob_start();
         $this->artisan('db:export')
+            ->expectsOutput('CREATE TABLE users (id INT);')
             ->assertExitCode(0);
-        $output = ob_get_clean();
 
-        $this->assertStringContainsString('CREATE TABLE users (id INT);', $output);
         $this->assertEquals('test_db', Config::get('database.connections.mysql.database'));
     }
 
@@ -72,21 +70,19 @@ class DbExportCommandTest extends TestCase
 
         DB::shouldReceive('purge')->once()->with('custom_conn');
 
-        ob_start();
         $this->artisan('db:export', ['--connection' => 'custom_conn'])
+            ->expectsOutput('CREATE TABLE users (id INT);')
             ->assertExitCode(0);
-        $output = ob_get_clean();
 
-        $this->assertStringContainsString('CREATE TABLE users (id INT);', $output);
         $this->assertEquals('custom_db', Config::get('database.connections.custom_conn.database'));
     }
 
-    public function test_it_exports_database_unsuccessfully()
+    public function test_it_fails_gracefully_when_export_process_fails()
     {
         $processMock = \Mockery::mock(Process::class);
         $processMock->shouldReceive('run')->once()->andReturn(1);
         $processMock->shouldReceive('isSuccessful')->once()->andReturn(false);
-        $processMock->shouldReceive('getOutput')->once()->andReturn('');
+        $processMock->shouldReceive('getErrorOutput')->once()->andReturn('mysqldump: Connection refused');
 
         $commandMock = \Mockery::mock(DbExportCommand::class . '[makeProcess]');
         $commandMock->shouldAllowMockingProtectedMethods();
@@ -102,7 +98,8 @@ class DbExportCommandTest extends TestCase
         DB::shouldReceive('purge')->once()->with('mysql');
 
         $this->artisan('db:export', ['schema' => 'failed_db'])
-            ->expectsOutput('Export failed_db database into SQL statements finished unsuccessfully!')
+            ->expectsOutput("Failed to export database 'failed_db'.")
+            ->expectsOutput('mysqldump: Connection refused')
             ->assertExitCode(1);
 
         $this->assertEquals('failed_db', Config::get('database.connections.mysql.database'));
