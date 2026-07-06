@@ -12,14 +12,14 @@ class DbDropCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'db:drop {name?}';
+    protected $signature = 'db:drop {name?} {--c|connection=}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Drop an existing MySQL database based on the database config file or the provided name';
+    protected $description = 'Drop an existing database based on the database config file or the provided name';
 
     /**
      * Execute the console command.
@@ -28,14 +28,22 @@ class DbDropCommand extends Command
      */
     public function handle()
     {
-        $schemaName = $this->argument('name') ?: config("database.connections.mysql.database");
+        $connection = $this->option('connection') ?: config('database.default');
+        $schemaName = $this->argument('name') ?: config("database.connections.{$connection}.database");
 
         $this->warn("You are about to DESTROY completely database $schemaName!");
         if ($this->confirm('Do you wish to continue?', false)) {
-            config(["database.connections.mysql.database" => null]);
+            config(["database.connections.{$connection}.database" => null]);
+            DB::purge($connection);
 
             $query = "DROP DATABASE IF EXISTS $schemaName;";
-            DB::statement($query);
+
+            try {
+                DB::connection($connection)->statement($query);
+            } catch (\Exception $e) {
+                $this->error("Failed to drop database: {$e->getMessage()}");
+                return Command::FAILURE;
+            }
 
             $this->info("Drop database $schemaName finished successfully!");
         }

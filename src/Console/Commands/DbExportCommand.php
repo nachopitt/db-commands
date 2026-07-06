@@ -3,6 +3,7 @@
 namespace Nachopitt\Database\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\DB;
 use Symfony\Component\Process\Process;
 
 class DbExportCommand extends Command
@@ -12,14 +13,14 @@ class DbExportCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'db:export {schema?}';
+    protected $signature = 'db:export {schema?} {--c|connection=}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Export an existing MySQL database into SQL statements';
+    protected $description = 'Export an existing database into SQL statements';
 
     /**
      * Execute the console command.
@@ -28,16 +29,18 @@ class DbExportCommand extends Command
      */
     public function handle()
     {
-        $defaultHost = config("database.connections.mysql.host");
-        $defaultUsername = config("database.connections.mysql.username");
-        $defaultDatabase = config("database.connections.mysql.database");
-        $defaultPassword = config("database.connections.mysql.password");
+        $connection = $this->option('connection') ?: config('database.default');
+        $defaultHost = config("database.connections.{$connection}.host");
+        $defaultUsername = config("database.connections.{$connection}.username");
+        $defaultDatabase = config("database.connections.{$connection}.database");
+        $defaultPassword = config("database.connections.{$connection}.password");
 
         $schemaName = $this->argument('schema') ?: $defaultDatabase;
 
-        config(["database.connections.mysql.database" => $schemaName]);
+        config(["database.connections.{$connection}.database" => $schemaName]);
+        DB::purge($connection);
 
-        $process = new Process([
+        $process = $this->makeProcess([
             'mysqldump', '-h', $defaultHost, '-u', $defaultUsername, "--password=$defaultPassword", '-d', $schemaName
         ]);
         $process->run();
@@ -53,5 +56,16 @@ class DbExportCommand extends Command
         echo $process->getOutput();
 
         return $exitCode;
+    }
+
+    /**
+     * Create a Process instance.
+     *
+     * @param array $command
+     * @return \Symfony\Component\Process\Process
+     */
+    protected function makeProcess(array $command): Process
+    {
+        return new Process($command);
     }
 }

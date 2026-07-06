@@ -12,14 +12,14 @@ class DbCreateCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'db:create {name?}';
+    protected $signature = 'db:create {name?} {--c|connection=}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Create a new MySQL database based on the database config file or the provided name';
+    protected $description = 'Create a new database based on the database config file or the provided name';
 
     /**
      * Execute the console command.
@@ -28,16 +28,25 @@ class DbCreateCommand extends Command
      */
     public function handle()
     {
-        $schemaName = $this->argument('name') ?: config("database.connections.mysql.database");
-        $charset = config("database.connections.mysql.charset",'utf8mb4');
-        $collation = config("database.connections.mysql.collation",'utf8mb4_unicode_ci');
+        $connection = $this->option('connection') ?: config('database.default');
+        $schemaName = $this->argument('name') ?: config("database.connections.{$connection}.database");
+        $charset = config("database.connections.{$connection}.charset", 'utf8mb4');
+        $collation = config("database.connections.{$connection}.collation", 'utf8mb4_unicode_ci');
 
-        config(["database.connections.mysql.database" => null]);
+        config(["database.connections.{$connection}.database" => null]);
+        DB::purge($connection);
 
         $query = "CREATE DATABASE IF NOT EXISTS `$schemaName` CHARACTER SET $charset COLLATE $collation;";
-        DB::statement($query);
 
-        config(["database.connections.mysql.database" => $schemaName]);
+        try {
+            DB::connection($connection)->statement($query);
+        } catch (\Exception $e) {
+            $this->error("Failed to create database: {$e->getMessage()}");
+            return Command::FAILURE;
+        }
+
+        config(["database.connections.{$connection}.database" => $schemaName]);
+        DB::purge($connection);
 
         $this->info("Create database $schemaName finished successfully!");
         return Command::SUCCESS;
