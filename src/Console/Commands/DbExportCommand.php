@@ -13,7 +13,7 @@ class DbExportCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'db:export {schema?} {--c|connection=}';
+    protected $signature = 'db:export {schema?} {--c|connection=} {--skip-ssl}';
 
     /**
      * The console command description.
@@ -34,15 +34,25 @@ class DbExportCommand extends Command
         $defaultUsername = config("database.connections.{$connection}.username");
         $defaultDatabase = config("database.connections.{$connection}.database");
         $defaultPassword = config("database.connections.{$connection}.password");
+        $command = [
+            'mysqldump',
+            '-h', $defaultHost,
+            '-u', $defaultUsername,
+            '--password=' . $defaultPassword,
+        ];
+
+        if ($this->option('skip-ssl')) {
+            $command[] = '--skip-ssl';
+        }
 
         $schemaName = $this->argument('schema') ?: $defaultDatabase;
+        $command[] = '-d';
+        $command[] = $schemaName;
 
         config(["database.connections.{$connection}.database" => $schemaName]);
         DB::purge($connection);
 
-        $process = $this->makeProcess([
-            'mysqldump', '-h', $defaultHost, '-u', $defaultUsername, "--password=$defaultPassword", '-d', $schemaName
-        ]);
+        $process = $this->makeProcess($command);
         $process->run();
 
         if (!$process->isSuccessful()) {

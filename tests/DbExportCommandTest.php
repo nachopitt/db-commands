@@ -104,4 +104,31 @@ class DbExportCommandTest extends TestCase
 
         $this->assertEquals('failed_db', Config::get('database.connections.mysql.database'));
     }
+
+    public function test_it_exports_database_with_skip_ssl_option()
+    {
+        $processMock = \Mockery::mock(Process::class);
+        $processMock->shouldReceive('run')->once()->andReturn(0);
+        $processMock->shouldReceive('isSuccessful')->once()->andReturn(true);
+        $processMock->shouldReceive('getOutput')->once()->andReturn('CREATE TABLE users (id INT);');
+
+        $commandMock = \Mockery::mock(DbExportCommand::class . '[makeProcess]');
+        $commandMock->shouldAllowMockingProtectedMethods();
+        $commandMock->shouldReceive('makeProcess')
+            ->once()
+            ->with([
+                'mysqldump', '-h', '127.0.0.1', '-u', 'root', '--password=secret', '--skip-ssl', '-d', 'test_db'
+            ])
+            ->andReturn($processMock);
+
+        $this->app->instance(DbExportCommand::class, $commandMock);
+
+        DB::shouldReceive('purge')->once()->with('mysql');
+
+        $this->artisan('db:export', ['--skip-ssl' => true])
+            ->expectsOutput('CREATE TABLE users (id INT);')
+            ->assertExitCode(0);
+
+        $this->assertEquals('test_db', Config::get('database.connections.mysql.database'));
+    }
 }
