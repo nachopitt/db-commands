@@ -13,14 +13,14 @@ class DbImportCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'db:import {file?} {--s|schema=} {--i|ignore-foreign-key-checks}';
+    protected $signature = 'db:import {file?} {--s|schema=} {--i|ignore-foreign-key-checks} {--c|connection=}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Import a SQL file into an existing MySQL database';
+    protected $description = 'Import a SQL file into an existing database';
 
     /**
      * Execute the console command.
@@ -29,25 +29,39 @@ class DbImportCommand extends Command
      */
     public function handle()
     {
-        $defaultDatabase = config("database.connections.mysql.database");
+        $connection = $this->option('connection') ?: config('database.default');
+        $defaultDatabase = config("database.connections.{$connection}.database");
         $schemaName = $this->option('schema') ?: $defaultDatabase;
         $sqlImportFile = $this->argument('file') ?: "database_model/$defaultDatabase.sql";
         $ignoreForeignKeyChecks = $this->option('ignore-foreign-key-checks');
 
-        $sqlImportFileContents = File::get($sqlImportFile);
-
-        config(["database.connections.mysql.database" => $schemaName]);
-
-        if ($ignoreForeignKeyChecks) {
-            DB::statement('SET FOREIGN_KEY_CHECKS=0');
+        try {
+            $sqlImportFileContents = File::get($sqlImportFile);
+        } catch (\Illuminate\Contracts\Filesystem\FileNotFoundException $e) {
+            $this->error("SQL import file not found at: {$sqlImportFile}");
+            return Command::FAILURE;
         }
 
-        DB::statement("USE `$schemaName`");
+        config(["database.connections.{$connection}.database" => $schemaName]);
+        DB::purge($connection);
 
-        DB::unprepared($sqlImportFileContents);
+        try {
+            $db = DB::connection($connection);
 
-        if ($ignoreForeignKeyChecks) {
-            DB::statement('SET FOREIGN_KEY_CHECKS=1');
+            if ($ignoreForeignKeyChecks) {
+                $db->statement('SET FOREIGN_KEY_CHECKS=0');
+            }
+
+            $db->statement("USE `$schemaName`");
+
+            $db->unprepared($sqlImportFileContents);
+
+            if ($ignoreForeignKeyChecks) {
+                $db->statement('SET FOREIGN_KEY_CHECKS=1');
+            }
+        } catch (\Exception $e) {
+            $this->error("Failed to import SQL file: {$e->getMessage()}");
+            return Command::FAILURE;
         }
 
         $this->info("Import SQL file $sqlImportFile into $schemaName database finished successfully!");

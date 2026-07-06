@@ -12,7 +12,7 @@ class DbTruncateCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'db:truncate {tables?} {--s|schema=} {--i|ignore-foreign-key-checks}';
+    protected $signature = 'db:truncate {tables?} {--s|schema=} {--i|ignore-foreign-key-checks} {--c|connection=}';
 
     /**
      * The console command description.
@@ -28,33 +28,42 @@ class DbTruncateCommand extends Command
      */
     public function handle()
     {
-        $defaultDatabase = config("database.connections.mysql.database");
+        $connection = $this->option('connection') ?: config('database.default');
+        $defaultDatabase = config("database.connections.{$connection}.database");
         $schemaName = $this->option('schema') ?: $defaultDatabase;
         $ignoreForeignKeyChecks = $this->option('ignore-foreign-key-checks');
 
-        if ($this->argument('tables')) {
-            $tableNames = explode(',', $this->argument('tables'));
-        }
-        else {
-            $tableNames = array_column(DB::select('SHOW TABLES'), "Tables_in_$schemaName");
-        }
+        config(["database.connections.{$connection}.database" => $schemaName]);
+        DB::purge($connection);
 
-        config(["database.connections.mysql.database" => $schemaName]);
+        try {
+            $db = DB::connection($connection);
 
-        if ($ignoreForeignKeyChecks) {
-            DB::statement('SET FOREIGN_KEY_CHECKS=0');
-        }
+            if ($this->argument('tables')) {
+                $tableNames = explode(',', $this->argument('tables'));
+            }
+            else {
+                $tableNames = array_column($db->select('SHOW TABLES'), "Tables_in_$schemaName");
+            }
 
-        DB::statement("USE `$schemaName`");
+            if ($ignoreForeignKeyChecks) {
+                $db->statement('SET FOREIGN_KEY_CHECKS=0');
+            }
 
-        foreach ($tableNames as $tableName) {
-            DB::statement("TRUNCATE TABLE `$tableName`");
+            $db->statement("USE `$schemaName`");
 
-            $this->info(sprintf('Table %s truncated successfully', $tableName));
-        }
+            foreach ($tableNames as $tableName) {
+                $db->statement("TRUNCATE TABLE `$tableName`");
 
-        if ($ignoreForeignKeyChecks) {
-            DB::statement('SET FOREIGN_KEY_CHECKS=1');
+                $this->info(sprintf('Table %s truncated successfully', $tableName));
+            }
+
+            if ($ignoreForeignKeyChecks) {
+                $db->statement('SET FOREIGN_KEY_CHECKS=1');
+            }
+        } catch (\Exception $e) {
+            $this->error("Failed to truncate tables: {$e->getMessage()}");
+            return Command::FAILURE;
         }
 
         return Command::SUCCESS;
