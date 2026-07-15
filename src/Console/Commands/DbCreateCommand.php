@@ -42,6 +42,7 @@ class DbCreateCommand extends Command
             DB::connection($connection)->statement($query);
         } catch (\Exception $e) {
             $this->error("Failed to create database: {$e->getMessage()}");
+
             return Command::FAILURE;
         }
 
@@ -49,6 +50,7 @@ class DbCreateCommand extends Command
         DB::purge($connection);
 
         $this->info("Create database $schemaName finished successfully!");
+
         return Command::SUCCESS;
     }
 }

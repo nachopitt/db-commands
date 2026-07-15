@@ -42,12 +42,12 @@ class DbDropCommand extends Command
                 DB::connection($connection)->statement($query);
             } catch (\Exception $e) {
                 $this->error("Failed to drop database: {$e->getMessage()}");
+
                 return Command::FAILURE;
             }
 
             $this->info("Drop database $schemaName finished successfully!");
-        }
-        else {
+        } else {
             $this->info("Drop database $schemaName canceled!");
         }
 

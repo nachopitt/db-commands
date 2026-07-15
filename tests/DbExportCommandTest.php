@@ -2,8 +2,8 @@
 
 namespace Nachopitt\Database\Tests;
 
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\DB;
 use Nachopitt\Database\Console\Commands\DbExportCommand;
 use Symfony\Component\Process\Process;
 
@@ -22,12 +22,12 @@ class DbExportCommandTest extends TestCase
         $processMock->shouldReceive('isSuccessful')->once()->andReturn(true);
         $processMock->shouldReceive('getOutput')->once()->andReturn('CREATE TABLE users (id INT);');
 
-        $commandMock = \Mockery::mock(DbExportCommand::class . '[makeProcess]');
+        $commandMock = \Mockery::mock(DbExportCommand::class.'[makeProcess]');
         $commandMock->shouldAllowMockingProtectedMethods();
         $commandMock->shouldReceive('makeProcess')
             ->once()
             ->with([
-                'mysqldump', '-h', '127.0.0.1', '-u', 'root', '--password=secret', '-d', 'test_db'
+                'mysqldump', '-h', '127.0.0.1', '-u', 'root', '--password=secret', '-d', 'test_db',
             ])
             ->andReturn($processMock);
 
@@ -57,12 +57,12 @@ class DbExportCommandTest extends TestCase
         $processMock->shouldReceive('isSuccessful')->once()->andReturn(true);
         $processMock->shouldReceive('getOutput')->once()->andReturn('CREATE TABLE users (id INT);');
 
-        $commandMock = \Mockery::mock(DbExportCommand::class . '[makeProcess]');
+        $commandMock = \Mockery::mock(DbExportCommand::class.'[makeProcess]');
         $commandMock->shouldAllowMockingProtectedMethods();
         $commandMock->shouldReceive('makeProcess')
             ->once()
             ->with([
-                'mysqldump', '-h', '127.0.0.Custom', '-u', 'custom_user', '--password=custom_secret', '-d', 'custom_db'
+                'mysqldump', '-h', '127.0.0.Custom', '-u', 'custom_user', '--password=custom_secret', '-d', 'custom_db',
             ])
             ->andReturn($processMock);
 
@@ -84,12 +84,12 @@ class DbExportCommandTest extends TestCase
         $processMock->shouldReceive('isSuccessful')->once()->andReturn(false);
         $processMock->shouldReceive('getErrorOutput')->once()->andReturn('mysqldump: Connection refused');
 
-        $commandMock = \Mockery::mock(DbExportCommand::class . '[makeProcess]');
+        $commandMock = \Mockery::mock(DbExportCommand::class.'[makeProcess]');
         $commandMock->shouldAllowMockingProtectedMethods();
         $commandMock->shouldReceive('makeProcess')
             ->once()
             ->with([
-                'mysqldump', '-h', '127.0.0.1', '-u', 'root', '--password=secret', '-d', 'failed_db'
+                'mysqldump', '-h', '127.0.0.1', '-u', 'root', '--password=secret', '-d', 'failed_db',
             ])
             ->andReturn($processMock);
 
@@ -112,12 +112,12 @@ class DbExportCommandTest extends TestCase
         $processMock->shouldReceive('isSuccessful')->once()->andReturn(true);
         $processMock->shouldReceive('getOutput')->once()->andReturn('CREATE TABLE users (id INT);');
 
-        $commandMock = \Mockery::mock(DbExportCommand::class . '[makeProcess]');
+        $commandMock = \Mockery::mock(DbExportCommand::class.'[makeProcess]');
         $commandMock->shouldAllowMockingProtectedMethods();
         $commandMock->shouldReceive('makeProcess')
             ->once()
             ->with([
-                'mysqldump', '-h', '127.0.0.1', '-u', 'root', '--password=secret', '--skip-ssl', '-d', 'test_db'
+                'mysqldump', '-h', '127.0.0.1', '-u', 'root', '--password=secret', '--skip-ssl', '-d', 'test_db',
             ])
             ->andReturn($processMock);
 

@@ -3,6 +3,7 @@
 namespace Nachopitt\Database\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File;
 
@@ -37,8 +38,9 @@ class DbImportCommand extends Command
 
         try {
             $sqlImportFileContents = File::get($sqlImportFile);
-        } catch (\Illuminate\Contracts\Filesystem\FileNotFoundException $e) {
+        } catch (FileNotFoundException $e) {
             $this->error("SQL import file not found at: {$sqlImportFile}");
+
             return Command::FAILURE;
         }
 
@@ -61,6 +63,7 @@ class DbImportCommand extends Command
             }
         } catch (\Exception $e) {
             $this->error("Failed to import SQL file: {$e->getMessage()}");
+
             return Command::FAILURE;
         }
 
