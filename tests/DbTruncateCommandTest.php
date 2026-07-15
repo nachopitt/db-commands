@@ -37,9 +37,9 @@ class DbTruncateCommandTest extends TestCase
     {
         $connectionMock = $this->mockConnection('mysql');
 
-        $table1 = new \stdClass();
+        $table1 = new \stdClass;
         $table1->Tables_in_test_db = 'users';
-        $table2 = new \stdClass();
+        $table2 = new \stdClass;
         $table2->Tables_in_test_db = 'posts';
 
         $connectionMock->shouldReceive('select')
@@ -138,7 +138,7 @@ class DbTruncateCommandTest extends TestCase
     {
         $connectionMock = $this->mockConnection('mysql');
 
-        $table = new \stdClass();
+        $table = new \stdClass;
         $table->Tables_in_custom_db = 'users';
 
         $connectionMock->shouldReceive('select')

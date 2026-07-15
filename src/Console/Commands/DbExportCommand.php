@@ -38,7 +38,7 @@ class DbExportCommand extends Command
             'mysqldump',
             '-h', $defaultHost,
             '-u', $defaultUsername,
-            '--password=' . $defaultPassword,
+            '--password='.$defaultPassword,
         ];
 
         if ($this->option('skip-ssl')) {
@@ -55,12 +55,11 @@ class DbExportCommand extends Command
         $process = $this->makeProcess($command);
         $process->run();
 
-        if (!$process->isSuccessful()) {
+        if (! $process->isSuccessful()) {
             $this->error("Failed to export database '$schemaName'.");
             $this->error($process->getErrorOutput());
             $exitCode = Command::FAILURE;
-        }
-        else {
+        } else {
             $this->line($process->getOutput());
             $exitCode = Command::SUCCESS;
         }
@@ -70,9 +69,6 @@ class DbExportCommand extends Command
 
     /**
      * Create a Process instance.
-     *
-     * @param array $command
-     * @return \Symfony\Component\Process\Process
      */
     protected function makeProcess(array $command): Process
     {

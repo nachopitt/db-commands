@@ -41,8 +41,7 @@ class DbTruncateCommand extends Command
 
             if ($this->argument('tables')) {
                 $tableNames = explode(',', $this->argument('tables'));
-            }
-            else {
+            } else {
                 $tableNames = array_column($db->select('SHOW TABLES'), "Tables_in_$schemaName");
             }
 
@@ -63,6 +62,7 @@ class DbTruncateCommand extends Command
             }
         } catch (\Exception $e) {
             $this->error("Failed to truncate tables: {$e->getMessage()}");
+
             return Command::FAILURE;
         }
 

@@ -1,0 +1,7 @@
+/.github export-ignore
+/tests export-ignore
+/.gitattributes export-ignore
+/.gitignore export-ignore
+/phpunit.xml export-ignore
+/composer.lock export-ignore
+/composer-dependency-analyser.php export-ignore

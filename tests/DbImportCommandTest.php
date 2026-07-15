@@ -2,8 +2,9 @@
 
 namespace Nachopitt\Database\Tests;
 
-use Illuminate\Support\Facades\File;
+use Illuminate\Contracts\Filesystem\FileNotFoundException;
 use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\File;
 
 class DbImportCommandTest extends TestCase
 {
@@ -137,7 +138,7 @@ class DbImportCommandTest extends TestCase
         File::shouldReceive('get')
             ->once()
             ->with('database_model/test_db.sql')
-            ->andThrow(new \Illuminate\Contracts\Filesystem\FileNotFoundException());
+            ->andThrow(new FileNotFoundException);
 
         $this->artisan('db:import')
             ->expectsOutput('SQL import file not found at: database_model/test_db.sql')

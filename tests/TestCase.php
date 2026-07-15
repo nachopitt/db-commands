@@ -2,9 +2,10 @@
 
 namespace Nachopitt\Database\Tests;
 
-use Orchestra\Testbench\TestCase as OrchestraTestCase;
-use Nachopitt\Database\ConsoleSupportServiceProvider;
 use Illuminate\Support\Facades\DB;
+use Mockery\MockInterface;
+use Nachopitt\Database\ConsoleSupportServiceProvider;
+use Orchestra\Testbench\TestCase as OrchestraTestCase;
 
 abstract class TestCase extends OrchestraTestCase
 {
@@ -35,8 +36,8 @@ abstract class TestCase extends OrchestraTestCase
     /**
      * Mock the DB connection and purge helper.
      *
-     * @param string $connection
-     * @return \Mockery\MockInterface
+     * @param  string  $connection
+     * @return MockInterface
      */
     protected function mockConnection($connection = 'mysql')
     {
