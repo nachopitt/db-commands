@@ -12,7 +12,10 @@ class DbDropCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'db:drop {name?} {--c|connection=}';
+    protected $signature = 'db:drop
+        {name? : The name of the database to drop}
+        {--c|connection= : The database connection to use}
+        {--force : Force the operation to run without prompting for confirmation}';
 
     /**
      * The console command description.
@@ -32,7 +35,7 @@ class DbDropCommand extends Command
         $schemaName = $this->argument('name') ?: config("database.connections.{$connection}.database");
 
         $this->warn("You are about to DESTROY completely database $schemaName!");
-        if ($this->confirm('Do you wish to continue?', false)) {
+        if ($this->option('force') || $this->confirm('Do you wish to continue?', false)) {
             config(["database.connections.{$connection}.database" => null]);
             DB::purge($connection);
 

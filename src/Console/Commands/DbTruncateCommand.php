@@ -12,7 +12,11 @@ class DbTruncateCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'db:truncate {tables?} {--s|schema=} {--i|ignore-foreign-key-checks} {--c|connection=}';
+    protected $signature = 'db:truncate
+        {tables? : A comma-separated list of tables to truncate}
+        {--s|schema= : The database schema to truncate tables from}
+        {--i|ignore-foreign-key-checks : Ignore foreign key checks during truncate}
+        {--c|connection= : The database connection to use}';
 
     /**
      * The console command description.

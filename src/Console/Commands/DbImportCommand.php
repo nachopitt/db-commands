@@ -14,7 +14,11 @@ class DbImportCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'db:import {file?} {--s|schema=} {--i|ignore-foreign-key-checks} {--c|connection=}';
+    protected $signature = 'db:import
+        {file? : The path to the SQL file to import}
+        {--s|schema= : The database schema to import into}
+        {--i|ignore-foreign-key-checks : Ignore foreign key checks during import}
+        {--c|connection= : The database connection to use}';
 
     /**
      * The console command description.

@@ -13,7 +13,10 @@ class DbExportCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'db:export {schema?} {--c|connection=} {--skip-ssl}';
+    protected $signature = 'db:export
+        {schema? : The name of the database to export}
+        {--c|connection= : The database connection to use}
+        {--skip-ssl : Bypass SSL certificate verification for the mysqldump command}';
 
     /**
      * The console command description.
