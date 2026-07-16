@@ -84,4 +84,18 @@ class DbDropCommandTest extends TestCase
             ->expectsOutput('Failed to drop database: SQL Connection Error')
             ->assertExitCode(1);
     }
+
+    public function test_it_drops_database_without_confirmation_when_force_option_is_provided()
+    {
+        $connectionMock = $this->mockConnection('mysql');
+        $connectionMock->shouldReceive('statement')
+            ->once()
+            ->with('DROP DATABASE IF EXISTS test_db;')
+            ->andReturn(true);
+
+        $this->artisan('db:drop', ['--force' => true])
+            ->expectsOutput('You are about to DESTROY completely database test_db!')
+            ->expectsOutput('Drop database test_db finished successfully!')
+            ->assertExitCode(0);
+    }
 }

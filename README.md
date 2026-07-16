@@ -30,13 +30,14 @@ php artisan db:create {name?} {--c|connection=}
 Drop an existing MySQL database.
 
 ```bash
-php artisan db:drop {name?} {--c|connection=}
+php artisan db:drop {name?} {--c|connection=} {--force}
 ```
 
 | Argument / Option | Description |
 |---|---|
 | `name` | The name of the MySQL database to drop. If not provided, the command will use the database name from your configuration. |
 | `--connection` | The database connection to use. Defaults to the active default connection. |
+| `--force` | Force the operation to run without prompting for confirmation. |
 
 ### `db:export`
 
