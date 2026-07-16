@@ -12,7 +12,10 @@ class DbDropCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'db:drop {name?} {--c|connection=} {--force}';
+    protected $signature = 'db:drop
+        {name? : The name of the database to drop}
+        {--c|connection= : The database connection to use}
+        {--force : Force the operation to run without prompting for confirmation}';
 
     /**
      * The console command description.

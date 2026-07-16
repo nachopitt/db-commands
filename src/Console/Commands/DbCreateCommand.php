@@ -12,7 +12,9 @@ class DbCreateCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'db:create {name?} {--c|connection=}';
+    protected $signature = 'db:create
+        {name? : The name of the database to create}
+        {--c|connection= : The database connection to use}';
 
     /**
      * The console command description.
